@@ -30,6 +30,27 @@ const STANDARD_FIELDS = new Set([
   'position','category','items','label','url','text','organization',
 ]);
 
+const DEMO_TEMPLATE = {
+  _id: '000000000000000000000001',
+  name: 'Demo Template',
+  description: 'Starter template for testing save/download when no templates are configured.',
+  structureConfig: { colors: { primary: '#2563eb' } },
+  detectedFields: ['experience', 'education', 'projects', 'skills'],
+  htmlTemplate: `
+    <div style="font-family: Arial, sans-serif; padding: 36px; color: #0f172a;">
+      <h1 style="margin: 0; font-size: 32px;">[[fullName]]</h1>
+      <p style="margin: 8px 0 20px; color: #475569;">[[email]] • [[phone]] • [[address]]</p>
+      <h3 style="margin-bottom: 8px; border-bottom: 2px solid #2563eb; padding-bottom: 4px;">Summary</h3>
+      <p style="line-height: 1.6;">[[summary]]</p>
+      [[#experience]]
+      <h3 style="margin: 20px 0 8px; border-bottom: 2px solid #2563eb; padding-bottom: 4px;">Experience</h3>
+      <p style="margin: 0;"><strong>[[company]]</strong> — [[role]] [[duration]]</p>
+      <p style="margin: 6px 0 0; line-height: 1.5;">[[description]]</p>
+      [[/experience]]
+    </div>
+  `
+};
+
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 const Builder = () => {
@@ -65,31 +86,49 @@ const Builder = () => {
   const fetchData = async () => {
     try {
       const { data: tpls } = await api.get('/templates/active');
-      setTemplates(tpls);
+      const usableTemplates = tpls.length > 0 ? tpls : [DEMO_TEMPLATE];
+      setTemplates(usableTemplates);
       if (id) {
         const { data: res } = await api.get(`/resumes/${id}`);
         setResumeData(res);
-        setSelectedTemplate(res.templateId);
-      } else if (tpls.length > 0) {
-        setSelectedTemplate(tpls[0]);
+        setSelectedTemplate(res.templateId || usableTemplates[0]);
+      } else {
+        setSelectedTemplate(usableTemplates[0]);
       }
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   };
 
   // ── Save ─────────────────────────────────────────────────────────────────────
+  const getSelectedTemplateId = () => {
+    if (!selectedTemplate) return resumeData.templateId?._id || resumeData.templateId || '';
+    if (typeof selectedTemplate === 'string') return selectedTemplate;
+    return selectedTemplate._id || '';
+  };
+
+  const persistResume = async () => {
+    const templateId = getSelectedTemplateId();
+    if (!templateId) {
+      throw new Error('Please select a template before saving.');
+    }
+
+    const payload = { ...resumeData, templateId };
+    if (id) {
+      const { data } = await api.put(`/resumes/${id}`, payload);
+      return data._id || id;
+    }
+
+    const { data } = await api.post('/resumes', payload);
+    navigate(`/builder/${data._id}`);
+    return data._id;
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
-      const payload = { ...resumeData, templateId: selectedTemplate?._id };
-      if (id) {
-        await api.put(`/resumes/${id}`, payload);
-      } else {
-        const { data } = await api.post('/resumes', payload);
-        navigate(`/builder/${data._id}`);
-      }
+      await persistResume();
       alert('Resume saved successfully!');
-    } catch (err) { alert('Failed to save resume'); }
+    } catch (err: any) { alert(err.message || 'Failed to save resume'); }
     finally { setSaving(false); }
   };
 
@@ -97,10 +136,10 @@ const Builder = () => {
   const handlePrint = useReactToPrint({ contentRef: printRef });
 
   const handleLatexDownload = async () => {
-    if (!id) { alert('Please save your resume first.'); return; }
     setDownloadingLatex(true);
     try {
-      const response = await api.get(`/resumes/${id}/pdf`, { responseType: 'blob' });
+      const resumeId = id || await persistResume();
+      const response = await api.get(`/resumes/${resumeId}/pdf`, { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -185,10 +224,10 @@ const Builder = () => {
   );
 
   return (
-    <div className="min-h-screen lg:h-screen flex flex-col bg-slate-50 overflow-hidden">
+    <div className="min-h-screen lg:h-screen flex flex-col bg-slate-50 overflow-x-hidden">
       {/* ── Header ── */}
-      <header className="bg-white border-b px-3 sm:px-6 py-3 sm:py-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-sm z-50">
-        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+      <header className="bg-white border-b px-2.5 sm:px-4 lg:px-6 py-2.5 sm:py-3 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 shadow-sm z-50">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 basis-[340px]">
           <button onClick={() => navigate('/dashboard')} className="p-2 hover:bg-slate-50 rounded-xl transition-colors shrink-0">
             <ChevronLeft />
           </button>
@@ -196,38 +235,38 @@ const Builder = () => {
           <input
             value={resumeData.title}
             onChange={(e) => setResumeData({ ...resumeData, title: e.target.value })}
-            className="text-base sm:text-xl font-bold text-slate-800 bg-transparent border-none outline-none focus:ring-2 ring-blue-100 px-2 rounded-lg min-w-0 w-full"
+            className="text-sm min-[480px]:text-base sm:text-lg md:text-xl font-bold text-slate-800 bg-transparent border-none outline-none focus:ring-2 ring-blue-100 px-2 rounded-lg min-w-0 w-full"
           />
         </div>
-        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+        <div className="flex items-center justify-end gap-2 sm:gap-3 flex-1 basis-[340px] flex-wrap min-[900px]:flex-nowrap">
           <button onClick={handleSave} disabled={saving}
-            className="flex items-center gap-2 px-3 sm:px-5 py-2.5 bg-blue-50 text-blue-600 rounded-xl font-bold hover:bg-blue-100 disabled:opacity-50 transition-all border border-blue-100 text-sm">
+            className="flex items-center justify-center gap-2 px-3 sm:px-4 lg:px-5 py-2.5 bg-blue-50 text-blue-600 rounded-xl font-bold hover:bg-blue-100 disabled:opacity-50 transition-all border border-blue-100 text-xs min-[480px]:text-sm min-[900px]:min-w-[110px] min-[520px]:flex-1 min-[900px]:flex-none">
             {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} Save
           </button>
           <button onClick={handlePrint}
-            className="flex items-center gap-2 px-3 sm:px-5 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all text-sm">
+            className="flex items-center justify-center gap-2 px-3 sm:px-4 lg:px-5 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all text-xs min-[480px]:text-sm min-[900px]:min-w-[110px] min-[520px]:flex-1 min-[900px]:flex-none">
             <Download size={18} /> HTML
           </button>
           <button onClick={handleLatexDownload} disabled={downloadingLatex}
-            className="flex items-center gap-2 px-3 sm:px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all disabled:opacity-70 text-sm">
+            className="flex items-center justify-center gap-2 px-3 sm:px-4 lg:px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all disabled:opacity-70 text-xs min-[480px]:text-sm min-[900px]:min-w-[130px] min-[520px]:flex-1 min-[900px]:flex-none">
             {downloadingLatex ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
             {downloadingLatex ? 'Compiling…' : 'LaTeX PDF'}
           </button>
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
         {/* ── Sidebar ── */}
-        <aside className="w-full lg:w-[500px] bg-white border-r flex flex-col lg:h-full z-40 max-h-[56vh] lg:max-h-none">
+        <aside className="w-full lg:w-[500px] bg-white border-r flex flex-col lg:h-full z-40 max-h-[58vh] lg:max-h-none min-h-0">
 
           {/* Tab bar — scrollable, only shows relevant tabs */}
-          <div className="flex p-2 bg-slate-50 m-4 rounded-2xl gap-1 overflow-x-auto whitespace-nowrap scrollbar-hide">
+          <div className="grid grid-cols-2 min-[520px]:flex p-2 bg-slate-50 m-3 sm:m-4 rounded-2xl gap-2 min-[520px]:gap-1 min-[520px]:overflow-x-auto min-[520px]:whitespace-nowrap">
             {visibleTabs.map(t => (
               <TabButton key={t.id} active={activeTab === t.id} onClick={() => setActiveTab(t.id)} icon={t.icon} label={t.label} />
             ))}
           </div>
 
-          <div className="flex-1 overflow-y-auto px-4 sm:px-8 pb-10 sm:pb-20 space-y-8 scroll-smooth">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 sm:px-6 lg:px-8 pb-10 sm:pb-20 space-y-8 scroll-smooth">
 
             {/* ── INFO ── */}
             {activeTab === 'info' && (
@@ -478,8 +517,8 @@ const Builder = () => {
         </aside>
 
         {/* ── Preview ── */}
-        <main className="flex-1 bg-slate-200 overflow-y-auto p-3 sm:p-6 lg:p-12 xl:p-20 flex justify-center custom-scrollbar">
-          <div className="w-full max-w-[850px] bg-white shadow-2xl origin-top h-fit">
+        <main className="flex-1 min-h-0 bg-slate-200 overflow-y-auto overflow-x-hidden p-2.5 sm:p-4 lg:p-8 xl:p-12 flex justify-center custom-scrollbar">
+          <div className="w-full max-w-[850px] bg-white shadow-2xl origin-top h-fit overflow-hidden">
             <div ref={printRef}>
               <TemplateRenderer
                 data={renderData}
@@ -531,7 +570,7 @@ type AddButtonProps = {
 
 const TabButton = ({ active, onClick, icon, label }: TabButtonProps) => (
   <button onClick={onClick}
-    className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${active ? 'bg-white shadow-sm text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
+    className={`w-full min-[520px]:w-auto flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-2.5 rounded-xl font-bold text-[11px] sm:text-xs transition-all ${active ? 'bg-white shadow-sm text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
     {icon} {label}
   </button>
 );

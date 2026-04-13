@@ -33,7 +33,7 @@ const Login = () => {
     <div className="min-h-screen bg-slate-50">
       <Navbar />
       
-      <div className="flex items-center justify-center pt-32 pb-20 px-6">
+      <div className="flex items-center justify-center pt-40 sm:pt-32 pb-20 px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}

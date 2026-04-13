@@ -39,6 +39,24 @@ export interface IResume extends Document {
     date: string;
   }>;
   skills: string[];
+  links?: Array<{
+    label: string;
+    url: string;
+    text?: string;
+  }>;
+  coursework?: Array<{
+    title: string;
+    items: string[];
+  }>;
+  training?: Array<{
+    title: string;
+    location?: string;
+    description?: string;
+  }>;
+  publications?: Array<{
+    title: string;
+    description?: string;
+  }>;
   customData?: any;
   createdAt: Date;
   updatedAt: Date;
@@ -92,6 +110,32 @@ const ResumeSchema: Schema = new Schema(
       }
     ],
     skills: [{ type: String }],
+    links: [
+      {
+        label: { type: String },
+        url: { type: String },
+        text: { type: String }
+      }
+    ],
+    coursework: [
+      {
+        title: { type: String },
+        items: [{ type: String }]
+      }
+    ],
+    training: [
+      {
+        title: { type: String },
+        location: { type: String },
+        description: { type: String }
+      }
+    ],
+    publications: [
+      {
+        title: { type: String },
+        description: { type: String }
+      }
+    ],
     customData: { type: Schema.Types.Mixed, default: {} },
   },
   { timestamps: true, strict: false }

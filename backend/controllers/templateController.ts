@@ -55,7 +55,49 @@ export const getTemplates = async (req: Request, res: Response) => {
 
 export const getActiveTemplates = async (req: Request, res: Response) => {
   try {
-    const templates = await Template.find({ isActive: true });
+    let templates = await Template.find({ isActive: true });
+    if (templates.length === 0) {
+      const demoTemplate = await Template.create({
+        name: 'Demo Template',
+        description: 'Auto-generated starter template for quick testing.',
+        structureConfig: { colors: { primary: '#2563eb' } },
+        htmlTemplate: `
+          <div style="font-family: Arial, sans-serif; padding: 36px; color: #0f172a;">
+            <h1 style="margin: 0; font-size: 32px;">[[fullName]]</h1>
+            <p style="margin: 8px 0 20px; color: #475569;">[[email]] • [[phone]] • [[address]]</p>
+            <h3 style="margin-bottom: 8px; border-bottom: 2px solid #2563eb; padding-bottom: 4px;">Summary</h3>
+            <p style="line-height: 1.6;">[[summary]]</p>
+            [[#experience]]
+            <h3 style="margin: 20px 0 8px; border-bottom: 2px solid #2563eb; padding-bottom: 4px;">Experience</h3>
+            <p style="margin: 0;"><strong>[[company]]</strong> — [[role]] [[duration]]</p>
+            <p style="margin: 6px 0 0; line-height: 1.5;">[[description]]</p>
+            [[/experience]]
+          </div>
+        `,
+        latexTemplate: `
+\\documentclass[10pt]{article}
+\\usepackage[a4paper,margin=0.7in]{geometry}
+\\begin{document}
+\\begin{center}
+{\\LARGE \\textbf{[[fullName]]}}\\\\
+[[email]] \\quad [[phone]] \\quad [[address]]
+\\end{center}
+\\vspace{8pt}
+\\textbf{Summary}\\\\
+[[summary]]
+\\vspace{8pt}
+\\textbf{Experience}\\\\
+[[#experience]]
+\\textbf{[[company]]} -- [[role]] [[duration]]\\\\
+[[description]]\\\\
+[[/experience]]
+\\end{document}
+        `,
+        detectedFields: ['experience', 'education', 'projects', 'skills', 'summary', 'fullName', 'email', 'phone', 'address'],
+        isActive: true
+      });
+      templates = [demoTemplate];
+    }
     res.status(200).json(templates);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching active templates' });
