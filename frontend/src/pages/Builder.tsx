@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import type { ReactNode } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useReactToPrint } from 'react-to-print';
@@ -9,7 +10,6 @@ import {
 } from 'lucide-react';
 import api from '../utils/api';
 import TemplateRenderer from '../components/TemplateRenderer';
-import Navbar from '../components/Navbar';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -42,7 +42,6 @@ const Builder = () => {
   const [templates, setTemplates]   = useState<any[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [downloadingLatex, setDownloadingLatex] = useState(false);
-  const [showExampleModal, setShowExampleModal] = useState(false);
   const [activeTab, setActiveTab]   = useState('info');
 
   const [resumeData, setResumeData] = useState<any>({
@@ -95,7 +94,7 @@ const Builder = () => {
   };
 
   // ── Print / PDF ──────────────────────────────────────────────────────────────
-  const handlePrint = useReactToPrint({ content: () => printRef.current });
+  const handlePrint = useReactToPrint({ contentRef: printRef });
 
   const handleLatexDownload = async () => {
     if (!id) { alert('Please save your resume first.'); return; }
@@ -498,20 +497,52 @@ const Builder = () => {
 
 // ─── Shared Sub-Components ─────────────────────────────────────────────────────
 
-const TabButton = ({ active, onClick, icon, label }: any) => (
+type TabButtonProps = {
+  active: boolean;
+  onClick: () => void;
+  icon: ReactNode;
+  label: string;
+};
+
+type FormFieldProps = {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  className?: string;
+};
+
+type TextAreaProps = {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+};
+
+type ItemCardProps = {
+  children: ReactNode;
+  onRemove: () => void;
+};
+
+type AddButtonProps = {
+  label: string;
+  onClick: () => void;
+};
+
+const TabButton = ({ active, onClick, icon, label }: TabButtonProps) => (
   <button onClick={onClick}
     className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${active ? 'bg-white shadow-sm text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
     {icon} {label}
   </button>
 );
 
-const SectionHeader = ({ icon, title }: any) => (
+const SectionHeader = ({ icon, title }: { icon?: ReactNode; title: string }) => (
   <h3 className="text-xl font-bold text-slate-800 uppercase tracking-tighter flex items-center gap-2">
     {icon} {title}
   </h3>
 );
 
-const FormField = ({ label, value, onChange, placeholder, className }: any) => (
+const FormField = ({ label, value, onChange, placeholder, className }: FormFieldProps) => (
   <div className={`space-y-1 ${className || ''}`}>
     <label className="text-[10px] font-black text-slate-400 uppercase tracking-tighter ml-1">{label}</label>
     <input
@@ -523,7 +554,7 @@ const FormField = ({ label, value, onChange, placeholder, className }: any) => (
   </div>
 );
 
-const TextArea = ({ label, value, onChange, placeholder }: any) => (
+const TextArea = ({ label, value, onChange, placeholder }: TextAreaProps) => (
   <div className="space-y-1">
     <label className="text-[10px] font-black text-slate-400 uppercase tracking-tighter ml-1">{label}</label>
     <textarea
@@ -535,7 +566,7 @@ const TextArea = ({ label, value, onChange, placeholder }: any) => (
   </div>
 );
 
-const ItemCard = ({ children, onRemove }: any) => (
+const ItemCard = ({ children, onRemove }: ItemCardProps) => (
   <div className="p-6 border border-slate-100 rounded-3xl space-y-4 bg-slate-50/50 relative group">
     <button onClick={onRemove}
       className="absolute top-4 right-4 text-red-400 opacity-0 group-hover:opacity-100 p-2 hover:bg-red-50 rounded-lg transition-all">
@@ -545,7 +576,7 @@ const ItemCard = ({ children, onRemove }: any) => (
   </div>
 );
 
-const AddButton = ({ label, onClick }: any) => (
+const AddButton = ({ label, onClick }: AddButtonProps) => (
   <button onClick={onClick}
     className="w-full py-4 border-2 border-dashed border-slate-200 rounded-3xl text-slate-400 font-bold hover:border-blue-400 hover:text-blue-600 transition-all flex items-center justify-center gap-2">
     <Plus size={20} /> {label}
