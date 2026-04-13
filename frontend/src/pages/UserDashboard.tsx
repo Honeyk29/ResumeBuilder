@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Plus, FileText, Trash2, Edit, ExternalLink, Loader2 } from 'lucide-react';
+import { Plus, FileText, Trash2, Edit, Loader2 } from 'lucide-react';
 import api from '../utils/api';
 import Navbar from '../components/Navbar';
 import useAuthStore from '../store/useAuthStore';
