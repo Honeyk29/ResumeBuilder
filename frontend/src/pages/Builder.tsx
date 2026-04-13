@@ -248,17 +248,18 @@ const Builder = () => {
             className="text-sm min-[480px]:text-base sm:text-lg md:text-xl font-bold text-slate-800 bg-transparent border-none outline-none focus:ring-2 ring-blue-100 px-2 rounded-lg min-w-0 w-full"
           />
         </div>
-        <div className="flex items-center justify-center min-[980px]:justify-end gap-2 sm:gap-3 w-full min-[980px]:flex-1 min-[980px]:basis-[340px] flex-wrap">
+        <div className="flex items-center justify-between min-[980px]:justify-end gap-2 sm:gap-3 w-full max-w-[500px] mx-auto min-[980px]:max-w-none min-[980px]:mx-0 min-[980px]:flex-1 min-[980px]:basis-[340px] flex-wrap">
           <button onClick={handleSave} disabled={saving}
-            className="flex items-center justify-center gap-2 px-3 sm:px-4 lg:px-5 py-2.5 bg-blue-50 text-blue-600 rounded-xl font-bold hover:bg-blue-100 disabled:opacity-50 transition-all border border-blue-100 text-xs min-[480px]:text-sm min-w-[102px]">
+            className="flex-1 min-[980px]:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 lg:px-5 py-2.5 bg-blue-50 text-blue-600 rounded-xl font-bold hover:bg-blue-100 disabled:opacity-50 transition-all border border-blue-100 text-xs min-[480px]:text-sm min-w-[102px]">
             {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} Save
           </button>
           <button onClick={handlePrint}
-            className="flex items-center justify-center gap-2 px-3 sm:px-4 lg:px-5 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all text-xs min-[480px]:text-sm min-w-[102px]">
+            className="flex-1 min-[980px]:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 lg:px-5 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all text-xs min-[480px]:text-sm min-w-[102px]">
             <Download size={18} /> HTML
           </button>
           <button onClick={handleLatexDownload} disabled={downloadingLatex}
-            className="flex items-center justify-center gap-2 px-3 sm:px-4 lg:px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all disabled:opacity-70 text-xs min-[480px]:text-sm min-w-[130px]">
+            className="flex-1 min-[980px]:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 lg:px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all disabled:opacity-70 text-xs min-[480px]:text-sm min-w-[130px]">
+
             {downloadingLatex ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
             {downloadingLatex ? 'Compiling…' : 'LaTeX PDF'}
           </button>
@@ -580,7 +581,7 @@ type AddButtonProps = {
 
 const TabButton = ({ active, onClick, icon, label }: TabButtonProps) => (
   <button onClick={onClick}
-    className={`w-full min-[520px]:w-auto flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-2.5 rounded-xl font-bold text-[11px] sm:text-xs transition-all ${active ? 'bg-white shadow-sm text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
+    className={`w-auto flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-2.5 rounded-xl font-bold text-[11px] sm:text-xs transition-all ${active ? 'bg-white shadow-sm text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
     {icon} {label}
   </button>
 );
