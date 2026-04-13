@@ -80,6 +80,14 @@ const Builder = () => {
     customData:      {}
   });
 
+  const selectedTemplateObj =
+    typeof selectedTemplate === 'string'
+      ? templates.find((tpl: any) => tpl._id === selectedTemplate) || null
+      : selectedTemplate;
+
+  const selectedTemplateId =
+    selectedTemplateObj?._id || (typeof selectedTemplate === 'string' ? selectedTemplate : undefined);
+
   // ── Data Fetching ────────────────────────────────────────────────────────────
   useEffect(() => { fetchData(); }, [id]);
 
@@ -94,6 +102,7 @@ const Builder = () => {
         setSelectedTemplate(res.templateId || usableTemplates[0]);
       } else {
         setSelectedTemplate(usableTemplates[0]);
+
       }
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
@@ -127,6 +136,7 @@ const Builder = () => {
     setSaving(true);
     try {
       await persistResume();
+
       alert('Resume saved successfully!');
     } catch (err: any) { alert(err.message || 'Failed to save resume'); }
     finally { setSaving(false); }
@@ -188,7 +198,7 @@ const Builder = () => {
   ];
 
   const visibleTabs = tabs.filter(t =>
-    t.always || templateHasSection(selectedTemplate, t.section!)
+    t.always || templateHasSection(selectedTemplateObj, t.section!)
   );
 
   // Keep activeTab in sync when template changes
@@ -198,7 +208,7 @@ const Builder = () => {
   }, [selectedTemplate]);
 
   // Custom fields (non-standard)
-  const customFields = (selectedTemplate?.detectedFields || []).filter(
+  const customFields = (selectedTemplateObj?.detectedFields || []).filter(
     (f: string) => !STANDARD_FIELDS.has(f.toLowerCase())
   );
 
@@ -301,7 +311,7 @@ const Builder = () => {
                 {/* Custom / template-specific fields */}
                 {customFields.length > 0 && (
                   <div className="space-y-4 pt-4 border-t border-slate-100">
-                    <SectionHeader icon={<Sparkles size={16} className="text-blue-600" />} title={`${selectedTemplate.name} — Extra Fields`} />
+                    <SectionHeader icon={<Sparkles size={16} className="text-blue-600" />} title={`${selectedTemplateObj?.name || 'Template'} — Extra Fields`} />
                     <p className="text-[10px] text-slate-400 -mt-2">These fields are unique to this template.</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {customFields.map((f: string) => (
@@ -458,8 +468,8 @@ const Builder = () => {
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
                 <div className="flex items-baseline justify-between">
                   <h3 className="text-xl font-bold text-slate-800 uppercase tracking-tighter">Choose Template</h3>
-                  {selectedTemplate?.samplePdfUrl && (
-                    <a href={selectedTemplate.samplePdfUrl} target="_blank" rel="noreferrer"
+                  {selectedTemplateObj?.samplePdfUrl && (
+                    <a href={selectedTemplateObj.samplePdfUrl} target="_blank" rel="noreferrer"
                       className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1">
                       <ExternalLink size={12} /> View Sample PDF
                     </a>
@@ -469,8 +479,8 @@ const Builder = () => {
                 <div className="grid grid-cols-1 gap-6">
                   {templates.map((tpl: any) => (
                     <div key={tpl._id}
-                      onClick={() => setSelectedTemplate(tpl)}
-                      className={`group relative rounded-[2rem] border-2 transition-all overflow-hidden cursor-pointer ${selectedTemplate?._id === tpl._id ? 'border-blue-600 shadow-xl shadow-blue-100 ring-4 ring-blue-50' : 'border-slate-100 hover:border-slate-300'}`}>
+                      onClick={() => setSelectedTemplate(tpl._id)}
+                      className={`group relative rounded-[2rem] border-2 transition-all overflow-hidden cursor-pointer ${selectedTemplateId === tpl._id ? 'border-blue-600 shadow-xl shadow-blue-100 ring-4 ring-blue-50' : 'border-slate-100 hover:border-slate-300'}`}>
 
                       {/* Thumbnail or placeholder */}
                       <div className="aspect-video bg-slate-50 relative overflow-hidden">
@@ -482,7 +492,7 @@ const Builder = () => {
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center text-slate-200"><LayoutIcon size={48} /></div>
                         )}
-                        <div className={`absolute inset-0 bg-blue-600/10 transition-opacity ${selectedTemplate?._id === tpl._id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
+                        <div className={`absolute inset-0 bg-blue-600/10 transition-opacity ${selectedTemplateId === tpl._id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
                       </div>
 
                       <div className="p-5 flex items-center justify-between bg-white border-t">
@@ -501,7 +511,7 @@ const Builder = () => {
                               <FileText size={12} /> Sample
                             </a>
                           )}
-                          {selectedTemplate?._id === tpl._id && (
+                          {selectedTemplateId === tpl._id && (
                             <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg">
                               <Sparkles size={16} />
                             </div>
@@ -522,9 +532,9 @@ const Builder = () => {
             <div ref={printRef}>
               <TemplateRenderer
                 data={renderData}
-                config={selectedTemplate?.structureConfig}
-                htmlTemplate={selectedTemplate?.htmlTemplate}
-                detectedFields={selectedTemplate?.detectedFields || []}
+                config={selectedTemplateObj?.structureConfig}
+                htmlTemplate={selectedTemplateObj?.htmlTemplate}
+                detectedFields={selectedTemplateObj?.detectedFields || []}
               />
             </div>
           </div>

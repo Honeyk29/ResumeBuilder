@@ -34,10 +34,11 @@ const Login = () => {
       <Navbar />
       
       <div className="flex items-center justify-center pt-40 sm:pt-32 pb-20 px-4 sm:px-6">
+
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="w-full max-w-md bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200"
+          className="w-full max-w-md bg-white p-6 sm:p-10 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200"
         >
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-slate-900 mb-2">Welcome Back</h2>
