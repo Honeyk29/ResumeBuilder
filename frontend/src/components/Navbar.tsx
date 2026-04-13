@@ -1,7 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Layout, LogOut, User, ShieldCheck } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
-import { motion } from 'framer-motion';
 
 const Navbar = () => {
   const { user, logout } = useAuthStore();
