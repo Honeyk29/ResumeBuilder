@@ -236,8 +236,8 @@ const Builder = () => {
   return (
     <div className="min-h-screen lg:h-screen flex flex-col bg-slate-50 overflow-x-hidden">
       {/* ── Header ── */}
-      <header className="bg-white border-b px-2.5 sm:px-4 lg:px-6 py-2.5 sm:py-3 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 shadow-sm z-50">
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 basis-[340px]">
+      <header className="bg-white border-b px-2.5 sm:px-4 lg:px-6 py-2.5 sm:py-3 flex flex-col min-[980px]:flex-row items-stretch min-[980px]:items-center justify-between gap-2.5 sm:gap-3 shadow-sm z-50">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 w-full min-[980px]:flex-1 min-[980px]:basis-[340px]">
           <button onClick={() => navigate('/dashboard')} className="p-2 hover:bg-slate-50 rounded-xl transition-colors shrink-0">
             <ChevronLeft />
           </button>
@@ -248,29 +248,29 @@ const Builder = () => {
             className="text-sm min-[480px]:text-base sm:text-lg md:text-xl font-bold text-slate-800 bg-transparent border-none outline-none focus:ring-2 ring-blue-100 px-2 rounded-lg min-w-0 w-full"
           />
         </div>
-        <div className="flex items-center justify-end gap-2 sm:gap-3 flex-1 basis-[340px] flex-wrap min-[900px]:flex-nowrap">
+        <div className="flex items-center justify-between min-[980px]:justify-end gap-2 sm:gap-3 w-full max-w-[500px] mx-auto min-[980px]:max-w-none min-[980px]:mx-0 min-[980px]:flex-1 min-[980px]:basis-[340px] flex-wrap">
           <button onClick={handleSave} disabled={saving}
-            className="flex items-center justify-center gap-2 px-3 sm:px-4 lg:px-5 py-2.5 bg-blue-50 text-blue-600 rounded-xl font-bold hover:bg-blue-100 disabled:opacity-50 transition-all border border-blue-100 text-xs min-[480px]:text-sm min-[900px]:min-w-[110px] min-[520px]:flex-1 min-[900px]:flex-none">
+            className="flex-1 min-[980px]:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 lg:px-5 py-2.5 bg-blue-50 text-blue-600 rounded-xl font-bold hover:bg-blue-100 disabled:opacity-50 transition-all border border-blue-100 text-xs min-[480px]:text-sm min-w-[102px]">
             {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} Save
           </button>
           <button onClick={handlePrint}
-            className="flex items-center justify-center gap-2 px-3 sm:px-4 lg:px-5 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all text-xs min-[480px]:text-sm min-[900px]:min-w-[110px] min-[520px]:flex-1 min-[900px]:flex-none">
+            className="flex-1 min-[980px]:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 lg:px-5 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all text-xs min-[480px]:text-sm min-w-[102px]">
             <Download size={18} /> HTML
           </button>
           <button onClick={handleLatexDownload} disabled={downloadingLatex}
-            className="flex items-center justify-center gap-2 px-3 sm:px-4 lg:px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all disabled:opacity-70 text-xs min-[480px]:text-sm min-[900px]:min-w-[130px] min-[520px]:flex-1 min-[900px]:flex-none">
+            className="flex-1 min-[980px]:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 lg:px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all disabled:opacity-70 text-xs min-[480px]:text-sm min-w-[130px]">
             {downloadingLatex ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
             {downloadingLatex ? 'Compiling…' : 'LaTeX PDF'}
           </button>
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
+      <div className="flex-1 flex flex-col xl:flex-row overflow-hidden min-h-0">
         {/* ── Sidebar ── */}
-        <aside className="w-full lg:w-[500px] bg-white border-r flex flex-col lg:h-full z-40 max-h-[58vh] lg:max-h-none min-h-0">
+        <aside className="w-full max-w-[900px] mx-auto xl:mx-0 xl:w-[540px] 2xl:w-[580px] bg-white xl:border-r flex flex-col xl:h-full z-40 max-h-[58vh] xl:max-h-none min-h-0">
 
           {/* Tab bar — scrollable, only shows relevant tabs */}
-          <div className="grid grid-cols-2 min-[520px]:flex p-2 bg-slate-50 m-3 sm:m-4 rounded-2xl gap-2 min-[520px]:gap-1 min-[520px]:overflow-x-auto min-[520px]:whitespace-nowrap">
+          <div className="flex flex-wrap justify-center p-2 bg-slate-50 m-3 sm:m-4 rounded-2xl gap-2">
             {visibleTabs.map(t => (
               <TabButton key={t.id} active={activeTab === t.id} onClick={() => setActiveTab(t.id)} icon={t.icon} label={t.label} />
             ))}
@@ -282,12 +282,12 @@ const Builder = () => {
             {activeTab === 'info' && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
                 <SectionHeader icon={<User className="text-blue-600" />} title="Personal Details" />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-4">
                   <FormField label="Full Name"  value={resumeData.personalInfo.fullName}  onChange={v => updatePersonalInfo('fullName', v)} />
                   <FormField label="Email"       value={resumeData.personalInfo.email}     onChange={v => updatePersonalInfo('email', v)} />
                   <FormField label="Phone"       value={resumeData.personalInfo.phone}     onChange={v => updatePersonalInfo('phone', v)} />
                   <FormField label="Address"     value={resumeData.personalInfo.address}   onChange={v => updatePersonalInfo('address', v)} />
-                  <FormField label="Portfolio / Website" value={resumeData.personalInfo.portfolio} onChange={v => updatePersonalInfo('portfolio', v)} placeholder="https://..." className="col-span-2" />
+                  <FormField label="Portfolio / Website" value={resumeData.personalInfo.portfolio} onChange={v => updatePersonalInfo('portfolio', v)} placeholder="https://..." className="min-[700px]:col-span-2" />
                 </div>
 
                 <div className="space-y-1">
@@ -302,7 +302,7 @@ const Builder = () => {
 
                 <div className="space-y-4 pt-4 border-t border-slate-100">
                   <SectionHeader title="Social & Web" />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-4">
                     <FormField label="GitHub"   value={resumeData.personalInfo.github}   onChange={v => updatePersonalInfo('github', v)} />
                     <FormField label="LinkedIn" value={resumeData.personalInfo.linkedin} onChange={v => updatePersonalInfo('linkedin', v)} />
                   </div>
@@ -580,7 +580,7 @@ type AddButtonProps = {
 
 const TabButton = ({ active, onClick, icon, label }: TabButtonProps) => (
   <button onClick={onClick}
-    className={`w-full min-[520px]:w-auto flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-2.5 rounded-xl font-bold text-[11px] sm:text-xs transition-all ${active ? 'bg-white shadow-sm text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
+    className={`w-auto flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-2.5 rounded-xl font-bold text-[11px] sm:text-xs transition-all ${active ? 'bg-white shadow-sm text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
     {icon} {label}
   </button>
 );
