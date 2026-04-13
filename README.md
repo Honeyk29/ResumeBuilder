@@ -71,7 +71,7 @@ Admins upload LaTeX templates with `[[ variable ]]` placeholders. The system aut
 ```mermaid
 flowchart TD
     A[🛠️ Admin uploads LaTeX source] --> B[🔎 Backend parses placeholder tags]
-    B --> C[🧾 detectedFields[] generated]
+    B --> C[🧾 detectedFields list generated]
     C --> D[🧩 Builder UI renders only matching tabs/inputs]
     D --> E[👤 User fills data]
     E --> F[(💾 MongoDB: resumeData + customData)]
