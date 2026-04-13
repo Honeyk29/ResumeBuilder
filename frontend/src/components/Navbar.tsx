@@ -29,7 +29,6 @@ const Navbar = () => {
         </Link>
 
         <div className="flex items-center gap-2.5 sm:gap-3 font-medium text-slate-600 ml-auto max-[560px]:w-full max-[560px]:ml-0 max-[560px]:justify-evenly">
-
           {user ? (
             <>
               {user.role === 'ADMIN' && (

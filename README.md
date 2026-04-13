@@ -69,6 +69,7 @@ Admins upload LaTeX templates with `[[ variable ]]` placeholders. The system aut
 ### The "Source-First" Variable-Driven Pipeline
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryTextColor': '#111827', 'lineColor': '#334155', 'fontSize': '16px'}}}%%
 flowchart TD
     A[🛠️ Admin uploads LaTeX source] --> B[🔎 Backend parses placeholder tags]
     B --> C[🧾 detectedFields list generated]
@@ -93,6 +94,7 @@ flowchart TD
 ### Request/Service Flow
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryTextColor': '#111827', 'lineColor': '#334155', 'fontSize': '16px'}}}%%
 sequenceDiagram
     participant U as User
     participant FE as Frontend (React)
@@ -241,6 +243,7 @@ The app will be available at **http://localhost:5173**
 ### Local Runtime Flow
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryTextColor': '#111827', 'lineColor': '#334155', 'fontSize': '16px'}}}%%
 flowchart LR
     A[Run backend] --> B[Run frontend]
     B --> C[Open localhost:5173]
@@ -299,6 +302,7 @@ Use `[[ variableName ]]` for simple fields and `[[ #sectionName ]]` / `[[ /secti
 ### Template Parsing Flow
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryTextColor': '#111827', 'lineColor': '#334155', 'fontSize': '16px'}}}%%
 flowchart TD
     T1[Template source uploaded] --> T2[Regex parse placeholder blocks]
     T2 --> T3[Extract fields + sections]
@@ -366,6 +370,7 @@ The `TemplateRenderer` component uses a **3-path rendering strategy**:
 3. **Legacy Fallback** — The original React-based default layout.
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryTextColor': '#111827', 'lineColor': '#334155', 'fontSize': '16px'}}}%%
 flowchart LR
     L1[TemplateRenderer input] --> L2{HTML template exists?}
     L2 -- Yes --> L3[Render Mustache HTML]
