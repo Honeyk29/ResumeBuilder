@@ -278,7 +278,7 @@ const TemplateRenderer = ({ data, config, htmlTemplate, detectedFields }: Props)
   }
 
   // ── Path 3: Legacy Harshibar React Layout (fallback) ──
-  const { fonts, layout } = config;
+  const { fonts } = config;
   const style: any = { backgroundColor: colors?.background || '#fff', color: colors?.text || '#111827', fontFamily: fonts?.body || 'sans-serif' };
   const borderPrimaryStyle = { borderColor: accent };
   const primaryStyle = { color: accent };

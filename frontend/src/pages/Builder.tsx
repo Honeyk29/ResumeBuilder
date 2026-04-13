@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import type { ReactNode } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useReactToPrint } from 'react-to-print';
@@ -9,7 +10,6 @@ import {
 } from 'lucide-react';
 import api from '../utils/api';
 import TemplateRenderer from '../components/TemplateRenderer';
-import Navbar from '../components/Navbar';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -42,7 +42,6 @@ const Builder = () => {
   const [templates, setTemplates]   = useState<any[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [downloadingLatex, setDownloadingLatex] = useState(false);
-  const [showExampleModal, setShowExampleModal] = useState(false);
   const [activeTab, setActiveTab]   = useState('info');
 
   const [resumeData, setResumeData] = useState<any>({
@@ -60,6 +59,14 @@ const Builder = () => {
     customData:      {}
   });
 
+  const selectedTemplateObj =
+    typeof selectedTemplate === 'string'
+      ? templates.find((tpl: any) => tpl._id === selectedTemplate) || null
+      : selectedTemplate;
+
+  const selectedTemplateId =
+    selectedTemplateObj?._id || (typeof selectedTemplate === 'string' ? selectedTemplate : undefined);
+
   // ── Data Fetching ────────────────────────────────────────────────────────────
   useEffect(() => { fetchData(); }, [id]);
 
@@ -70,9 +77,9 @@ const Builder = () => {
       if (id) {
         const { data: res } = await api.get(`/resumes/${id}`);
         setResumeData(res);
-        setSelectedTemplate(res.templateId);
+        setSelectedTemplate(res.templateId?._id || res.templateId || tpls[0]?._id || null);
       } else if (tpls.length > 0) {
-        setSelectedTemplate(tpls[0]);
+        setSelectedTemplate(tpls[0]._id);
       }
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
@@ -82,7 +89,11 @@ const Builder = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const payload = { ...resumeData, templateId: selectedTemplate?._id };
+      if (!selectedTemplateId) {
+        alert('Please select a template before saving.');
+        return;
+      }
+      const payload = { ...resumeData, templateId: selectedTemplateId };
       if (id) {
         await api.put(`/resumes/${id}`, payload);
       } else {
@@ -95,7 +106,7 @@ const Builder = () => {
   };
 
   // ── Print / PDF ──────────────────────────────────────────────────────────────
-  const handlePrint = useReactToPrint({ content: () => printRef.current });
+  const handlePrint = useReactToPrint({ contentRef: printRef });
 
   const handleLatexDownload = async () => {
     if (!id) { alert('Please save your resume first.'); return; }
@@ -150,7 +161,7 @@ const Builder = () => {
   ];
 
   const visibleTabs = tabs.filter(t =>
-    t.always || templateHasSection(selectedTemplate, t.section!)
+    t.always || templateHasSection(selectedTemplateObj, t.section!)
   );
 
   // Keep activeTab in sync when template changes
@@ -160,7 +171,7 @@ const Builder = () => {
   }, [selectedTemplate]);
 
   // Custom fields (non-standard)
-  const customFields = (selectedTemplate?.detectedFields || []).filter(
+  const customFields = (selectedTemplateObj?.detectedFields || []).filter(
     (f: string) => !STANDARD_FIELDS.has(f.toLowerCase())
   );
 
@@ -186,40 +197,40 @@ const Builder = () => {
   );
 
   return (
-    <div className="h-screen flex flex-col bg-slate-50 overflow-hidden">
+    <div className="min-h-screen lg:h-screen flex flex-col bg-slate-50 overflow-hidden">
       {/* ── Header ── */}
-      <header className="bg-white border-b px-6 py-4 flex items-center justify-between shadow-sm z-50">
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate('/dashboard')} className="p-2 hover:bg-slate-50 rounded-xl transition-colors">
+      <header className="bg-white border-b px-3 sm:px-6 py-3 sm:py-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-sm z-50">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+          <button onClick={() => navigate('/dashboard')} className="p-2 hover:bg-slate-50 rounded-xl transition-colors shrink-0">
             <ChevronLeft />
           </button>
-          <div className="h-8 w-[1px] bg-slate-200 mx-2" />
+          <div className="h-8 w-[1px] bg-slate-200 mx-1 sm:mx-2 shrink-0" />
           <input
             value={resumeData.title}
             onChange={(e) => setResumeData({ ...resumeData, title: e.target.value })}
-            className="text-xl font-bold text-slate-800 bg-transparent border-none outline-none focus:ring-2 ring-blue-100 px-2 rounded-lg"
+            className="text-base sm:text-xl font-bold text-slate-800 bg-transparent border-none outline-none focus:ring-2 ring-blue-100 px-2 rounded-lg min-w-0 w-full"
           />
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <button onClick={handleSave} disabled={saving}
-            className="flex items-center gap-2 px-6 py-2.5 bg-blue-50 text-blue-600 rounded-xl font-bold hover:bg-blue-100 disabled:opacity-50 transition-all border border-blue-100">
+            className="flex items-center gap-2 px-3 sm:px-5 py-2.5 bg-blue-50 text-blue-600 rounded-xl font-bold hover:bg-blue-100 disabled:opacity-50 transition-all border border-blue-100 text-sm">
             {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} Save
           </button>
           <button onClick={handlePrint}
-            className="flex items-center gap-2 px-6 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all">
+            className="flex items-center gap-2 px-3 sm:px-5 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all text-sm">
             <Download size={18} /> HTML
           </button>
           <button onClick={handleLatexDownload} disabled={downloadingLatex}
-            className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all disabled:opacity-70">
+            className="flex items-center gap-2 px-3 sm:px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all disabled:opacity-70 text-sm">
             {downloadingLatex ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
             {downloadingLatex ? 'Compiling…' : 'LaTeX PDF'}
           </button>
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* ── Sidebar ── */}
-        <aside className="w-[500px] bg-white border-r flex flex-col h-full z-40">
+        <aside className="w-full lg:w-[500px] bg-white border-r flex flex-col lg:h-full z-40 max-h-[56vh] lg:max-h-none">
 
           {/* Tab bar — scrollable, only shows relevant tabs */}
           <div className="flex p-2 bg-slate-50 m-4 rounded-2xl gap-1 overflow-x-auto whitespace-nowrap scrollbar-hide">
@@ -228,13 +239,13 @@ const Builder = () => {
             ))}
           </div>
 
-          <div className="flex-1 overflow-y-auto px-8 pb-20 space-y-8 scroll-smooth">
+          <div className="flex-1 overflow-y-auto px-4 sm:px-8 pb-10 sm:pb-20 space-y-8 scroll-smooth">
 
             {/* ── INFO ── */}
             {activeTab === 'info' && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
                 <SectionHeader icon={<User className="text-blue-600" />} title="Personal Details" />
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField label="Full Name"  value={resumeData.personalInfo.fullName}  onChange={v => updatePersonalInfo('fullName', v)} />
                   <FormField label="Email"       value={resumeData.personalInfo.email}     onChange={v => updatePersonalInfo('email', v)} />
                   <FormField label="Phone"       value={resumeData.personalInfo.phone}     onChange={v => updatePersonalInfo('phone', v)} />
@@ -254,7 +265,7 @@ const Builder = () => {
 
                 <div className="space-y-4 pt-4 border-t border-slate-100">
                   <SectionHeader title="Social & Web" />
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField label="GitHub"   value={resumeData.personalInfo.github}   onChange={v => updatePersonalInfo('github', v)} />
                     <FormField label="LinkedIn" value={resumeData.personalInfo.linkedin} onChange={v => updatePersonalInfo('linkedin', v)} />
                   </div>
@@ -263,9 +274,9 @@ const Builder = () => {
                 {/* Custom / template-specific fields */}
                 {customFields.length > 0 && (
                   <div className="space-y-4 pt-4 border-t border-slate-100">
-                    <SectionHeader icon={<Sparkles size={16} className="text-blue-600" />} title={`${selectedTemplate.name} — Extra Fields`} />
+                    <SectionHeader icon={<Sparkles size={16} className="text-blue-600" />} title={`${selectedTemplateObj?.name || 'Template'} — Extra Fields`} />
                     <p className="text-[10px] text-slate-400 -mt-2">These fields are unique to this template.</p>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {customFields.map((f: string) => (
                         <FormField key={f} label={f} value={getCustomField(f)} onChange={v => updateCustomField(f, v)} />
                       ))}
@@ -282,11 +293,11 @@ const Builder = () => {
                 {resumeData.experience.map((exp: any, idx: number) => (
                   <ItemCard key={idx} onRemove={() => removeItem('experience', idx)}>
                     <FormField label="Company"   value={exp.company}   onChange={v => updateItem('experience', idx, 'company', v)} />
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <FormField label="Role / Position" value={exp.role || exp.position} onChange={v => { updateItem('experience', idx, 'role', v); updateItem('experience', idx, 'position', v); }} />
                       <FormField label="Location"  value={exp.location}  onChange={v => updateItem('experience', idx, 'location', v)} />
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <FormField label="Start Date" value={exp.startDate} placeholder="Jan 2022" onChange={v => { updateItem('experience', idx, 'startDate', v); updateItem('experience', idx, 'duration', `${v} – ${exp.endDate || 'Present'}`); }} />
                       <FormField label="End Date"   value={exp.endDate}   placeholder="Present"  onChange={v => { updateItem('experience', idx, 'endDate', v); updateItem('experience', idx, 'duration', `${exp.startDate || ''} – ${v}`); }} />
                     </div>
@@ -306,7 +317,7 @@ const Builder = () => {
                     <FormField label="Institution" value={edu.institution} onChange={v => updateItem('education', idx, 'institution', v)} />
                     <FormField label="Degree"      value={edu.degree}      onChange={v => updateItem('education', idx, 'degree', v)} />
                     <FormField label="Details / GPA / Location" value={edu.details} onChange={v => updateItem('education', idx, 'details', v)} />
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <FormField label="Start Date" value={edu.startDate} onChange={v => updateItem('education', idx, 'startDate', v)} />
                       <FormField label="End Date"   value={edu.endDate}   onChange={v => updateItem('education', idx, 'endDate', v)} />
                     </div>
@@ -420,8 +431,8 @@ const Builder = () => {
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
                 <div className="flex items-baseline justify-between">
                   <h3 className="text-xl font-bold text-slate-800 uppercase tracking-tighter">Choose Template</h3>
-                  {selectedTemplate?.samplePdfUrl && (
-                    <a href={selectedTemplate.samplePdfUrl} target="_blank" rel="noreferrer"
+                  {selectedTemplateObj?.samplePdfUrl && (
+                    <a href={selectedTemplateObj.samplePdfUrl} target="_blank" rel="noreferrer"
                       className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1">
                       <ExternalLink size={12} /> View Sample PDF
                     </a>
@@ -431,8 +442,8 @@ const Builder = () => {
                 <div className="grid grid-cols-1 gap-6">
                   {templates.map((tpl: any) => (
                     <div key={tpl._id}
-                      onClick={() => setSelectedTemplate(tpl)}
-                      className={`group relative rounded-[2rem] border-2 transition-all overflow-hidden cursor-pointer ${selectedTemplate?._id === tpl._id ? 'border-blue-600 shadow-xl shadow-blue-100 ring-4 ring-blue-50' : 'border-slate-100 hover:border-slate-300'}`}>
+                      onClick={() => setSelectedTemplate(tpl._id)}
+                      className={`group relative rounded-[2rem] border-2 transition-all overflow-hidden cursor-pointer ${selectedTemplateId === tpl._id ? 'border-blue-600 shadow-xl shadow-blue-100 ring-4 ring-blue-50' : 'border-slate-100 hover:border-slate-300'}`}>
 
                       {/* Thumbnail or placeholder */}
                       <div className="aspect-video bg-slate-50 relative overflow-hidden">
@@ -444,7 +455,7 @@ const Builder = () => {
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center text-slate-200"><LayoutIcon size={48} /></div>
                         )}
-                        <div className={`absolute inset-0 bg-blue-600/10 transition-opacity ${selectedTemplate?._id === tpl._id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
+                        <div className={`absolute inset-0 bg-blue-600/10 transition-opacity ${selectedTemplateId === tpl._id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
                       </div>
 
                       <div className="p-5 flex items-center justify-between bg-white border-t">
@@ -463,7 +474,7 @@ const Builder = () => {
                               <FileText size={12} /> Sample
                             </a>
                           )}
-                          {selectedTemplate?._id === tpl._id && (
+                          {selectedTemplateId === tpl._id && (
                             <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg">
                               <Sparkles size={16} />
                             </div>
@@ -479,14 +490,14 @@ const Builder = () => {
         </aside>
 
         {/* ── Preview ── */}
-        <main className="flex-1 bg-slate-200 overflow-y-auto p-20 flex justify-center custom-scrollbar">
-          <div className="w-[850px] bg-white shadow-2xl origin-top h-fit">
+        <main className="flex-1 bg-slate-200 overflow-y-auto p-3 sm:p-6 lg:p-12 xl:p-20 flex justify-center custom-scrollbar">
+          <div className="w-full max-w-[850px] bg-white shadow-2xl origin-top h-fit">
             <div ref={printRef}>
               <TemplateRenderer
                 data={renderData}
-                config={selectedTemplate?.structureConfig}
-                htmlTemplate={selectedTemplate?.htmlTemplate}
-                detectedFields={selectedTemplate?.detectedFields || []}
+                config={selectedTemplateObj?.structureConfig}
+                htmlTemplate={selectedTemplateObj?.htmlTemplate}
+                detectedFields={selectedTemplateObj?.detectedFields || []}
               />
             </div>
           </div>
@@ -498,20 +509,52 @@ const Builder = () => {
 
 // ─── Shared Sub-Components ─────────────────────────────────────────────────────
 
-const TabButton = ({ active, onClick, icon, label }: any) => (
+type TabButtonProps = {
+  active: boolean;
+  onClick: () => void;
+  icon: ReactNode;
+  label: string;
+};
+
+type FormFieldProps = {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  className?: string;
+};
+
+type TextAreaProps = {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+};
+
+type ItemCardProps = {
+  children: ReactNode;
+  onRemove: () => void;
+};
+
+type AddButtonProps = {
+  label: string;
+  onClick: () => void;
+};
+
+const TabButton = ({ active, onClick, icon, label }: TabButtonProps) => (
   <button onClick={onClick}
     className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${active ? 'bg-white shadow-sm text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
     {icon} {label}
   </button>
 );
 
-const SectionHeader = ({ icon, title }: any) => (
+const SectionHeader = ({ icon, title }: { icon?: ReactNode; title: string }) => (
   <h3 className="text-xl font-bold text-slate-800 uppercase tracking-tighter flex items-center gap-2">
     {icon} {title}
   </h3>
 );
 
-const FormField = ({ label, value, onChange, placeholder, className }: any) => (
+const FormField = ({ label, value, onChange, placeholder, className }: FormFieldProps) => (
   <div className={`space-y-1 ${className || ''}`}>
     <label className="text-[10px] font-black text-slate-400 uppercase tracking-tighter ml-1">{label}</label>
     <input
@@ -523,7 +566,7 @@ const FormField = ({ label, value, onChange, placeholder, className }: any) => (
   </div>
 );
 
-const TextArea = ({ label, value, onChange, placeholder }: any) => (
+const TextArea = ({ label, value, onChange, placeholder }: TextAreaProps) => (
   <div className="space-y-1">
     <label className="text-[10px] font-black text-slate-400 uppercase tracking-tighter ml-1">{label}</label>
     <textarea
@@ -535,7 +578,7 @@ const TextArea = ({ label, value, onChange, placeholder }: any) => (
   </div>
 );
 
-const ItemCard = ({ children, onRemove }: any) => (
+const ItemCard = ({ children, onRemove }: ItemCardProps) => (
   <div className="p-6 border border-slate-100 rounded-3xl space-y-4 bg-slate-50/50 relative group">
     <button onClick={onRemove}
       className="absolute top-4 right-4 text-red-400 opacity-0 group-hover:opacity-100 p-2 hover:bg-red-50 rounded-lg transition-all">
@@ -545,7 +588,7 @@ const ItemCard = ({ children, onRemove }: any) => (
   </div>
 );
 
-const AddButton = ({ label, onClick }: any) => (
+const AddButton = ({ label, onClick }: AddButtonProps) => (
   <button onClick={onClick}
     className="w-full py-4 border-2 border-dashed border-slate-200 rounded-3xl text-slate-400 font-bold hover:border-blue-400 hover:text-blue-600 transition-all flex items-center justify-center gap-2">
     <Plus size={20} /> {label}

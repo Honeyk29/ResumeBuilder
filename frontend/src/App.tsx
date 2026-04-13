@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
+import type { ReactElement } from 'react';
 import useAuthStore from './store/useAuthStore';
 
 // Temporary lazy-loaded component placeholders mapped to real pages.
@@ -11,7 +12,7 @@ import UserDashboard from './pages/UserDashboard';
 import Builder from './pages/Builder';
 
 // Protect Admin Pages Route Guard
-const AdminRoute = ({ children }: { children: JSX.Element }) => {
+const AdminRoute = ({ children }: { children: ReactElement }) => {
   const user = useAuthStore((state) => state.user);
   if (!user) return <Navigate to="/login" />;
   if (user.role !== 'ADMIN') return <Navigate to="/dashboard" />;
@@ -19,7 +20,7 @@ const AdminRoute = ({ children }: { children: JSX.Element }) => {
 };
 
 // Protect Private User Pages Route Guard
-const PrivateRoute = ({ children }: { children: JSX.Element }) => {
+const PrivateRoute = ({ children }: { children: ReactElement }) => {
   const user = useAuthStore((state) => state.user);
   return user ? children : <Navigate to="/login" />;
 };

@@ -1,15 +1,31 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Layout, Settings, Trash2, Edit2, Loader2, Save, X } from 'lucide-react';
+import { Plus, Layout, Trash2, Edit2, Loader2, Save, X } from 'lucide-react';
 import api from '../utils/api';
 import Navbar from '../components/Navbar';
+
+type TemplateFormData = {
+  name: string;
+  description: string;
+  thumbnailUrl: string;
+  structureConfig: {
+    colors: { primary: string; text: string; background: string };
+    fonts: { heading: string; body: string };
+    layout: string;
+  };
+  latexTemplate: string;
+  htmlTemplate: string;
+  samplePdfUrl: string;
+  isActive: boolean;
+  detectedFields: string[];
+};
 
 const AdminDashboard = () => {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<any>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<TemplateFormData>({
     name: '',
     description: '',
     thumbnailUrl: '',
