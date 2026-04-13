@@ -259,6 +259,7 @@ const Builder = () => {
           </button>
           <button onClick={handleLatexDownload} disabled={downloadingLatex}
             className="flex-1 min-[980px]:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 lg:px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all disabled:opacity-70 text-xs min-[480px]:text-sm min-w-[130px]">
+
             {downloadingLatex ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
             {downloadingLatex ? 'Compiling…' : 'LaTeX PDF'}
           </button>

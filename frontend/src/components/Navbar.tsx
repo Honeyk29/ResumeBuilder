@@ -14,7 +14,9 @@ const Navbar = () => {
   return (
 
     <nav className="fixed top-0 left-0 right-0 z-50 px-2 sm:px-4 lg:px-6 py-2.5 sm:py-3.5">
+
       <div className="max-w-7xl mx-auto glass flex flex-wrap items-center justify-between px-3 sm:px-5 lg:px-8 py-2.5 sm:py-3 gap-2.5 sm:gap-3 bg-white/10 border-white/20">
+
         <Link to="/" className="flex items-center gap-2 group min-w-0">
 
           <div className="bg-blue-600 p-2 rounded-lg group-hover:rotate-12 transition-transform">
@@ -26,8 +28,8 @@ const Navbar = () => {
           </span>
         </Link>
 
-
         <div className="flex items-center gap-2.5 sm:gap-3 font-medium text-slate-600 ml-auto max-[560px]:w-full max-[560px]:ml-0 max-[560px]:justify-evenly">
+
           {user ? (
             <>
               {user.role === 'ADMIN' && (
