@@ -94,7 +94,7 @@ flowchart TD
 ### Request/Service Flow
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryTextColor': '#111827', 'lineColor': '#334155', 'fontSize': '16px'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryTextColor': '#DC2626', 'lineColor': '#DC2626', 'fontSize': '16px', 'actorTextColor': '#DC2626', 'actorLineColor': '#DC2626', 'signalColor': '#DC2626', 'signalTextColor': '#DC2626'}}}%%
 sequenceDiagram
     participant U as User
     participant FE as Frontend (React)
